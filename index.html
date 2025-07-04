@@ -255,6 +255,70 @@
             accent-color: #666;
         }
 
+        .slogan-list {
+            height: 400px;
+            overflow-y: auto;
+            background: #333;
+            border: 1px solid #555;
+            margin-bottom: 8px;
+        }
+
+        .slogan-item {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slogan-item:hover {
+            background: #444;
+        }
+
+        .slogan-text {
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .slogan-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .slogan-btn {
+            padding: 2px 6px;
+            background: #555;
+            border: none;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 9px;
+        }
+
+        .slogan-btn:hover {
+            background: #666;
+        }
+
+        .slogan-input {
+            width: 100%;
+            padding: 6px;
+            background: #3a3a3a;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            font-size: 11px;
+            margin-bottom: 8px;
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .slogan-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -275,16 +339,20 @@
             .controls {
                 grid-template-columns: 1fr;
             }
-            
+
             .preset-controls {
                 grid-template-columns: 1fr;
             }
-            
+
+            .slogan-controls {
+                grid-template-columns: 1fr;
+            }
+
             .input-group {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
+
             .input-group label {
                 min-width: auto;
             }
@@ -292,417 +360,570 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="sidebar-item active" data-section="media" title="Медиа файлы">📁</div>
-            <div class="sidebar-item" data-section="composition" title="Композиция">🎬</div>
-            <div class="sidebar-item" data-section="presets" title="Пресеты">✨</div>
+<div class="container">
+    <div class="sidebar">
+        <div class="sidebar-item active" data-section="media" title="Медиа файлы">📁</div>
+        <div class="sidebar-item" data-section="composition" title="Композиция">🎬</div>
+        <div class="sidebar-item" data-section="presets" title="Пресеты">✨</div>
+        <div class="sidebar-item" data-section="slogans" title="Слоганы">📝</div>
+    </div>
+
+    <div class="content">
+        <div class="section active" id="media">
+            <div class="section-title">Медиа файлы</div>
+            <div class="folder-tabs">
+                <div class="tab active" data-folder="men">Men</div>
+                <div class="tab" data-folder="women">Women</div>
+            </div>
+            <input type="text" class="search-box" placeholder="Поиск файлов..." id="searchInput">
+            <div class="file-list" id="fileList"></div>
+            <div class="controls">
+                <button class="btn" onclick="refreshFiles()">Обновить</button>
+                <button class="btn" onclick="addSelectedFile()">Добавить</button>
+            </div>
+            <div class="input-group">
+                <label>Длительность (кадры):</label>
+                <input type="number" id="durationInput" value="40">
+            </div>
         </div>
 
-        <div class="content">
-            <div class="section active" id="media">
-                <div class="section-title">Медиа файлы</div>
-                <div class="folder-tabs">
-                    <div class="tab active" data-folder="men">Men</div>
-                    <div class="tab" data-folder="women">Women</div>
-                </div>
-                <input type="text" class="search-box" placeholder="Поиск файлов..." id="searchInput">
-                <div class="file-list" id="fileList"></div>
-                <div class="controls">
-                    <button class="btn" onclick="refreshFiles()">Обновить</button>
-                    <button class="btn" onclick="addSelectedFile()">Добавить</button>
-                </div>
-                <div class="input-group">
-                    <label>Длительность (кадры):</label>
-                    <input type="number" id="durationInput" value="40">
-                </div>
+        <div class="section" id="composition">
+            <div class="section-title">Управление композицией</div>
+            <div class="controls">
+                <button class="btn" onclick="deleteAllText()">Удалить текст</button>
+                <button class="btn" onclick="changeCompSize()">1080x1080</button>
+            </div>
+            <div class="input-group">
+                <label>Новая длительность (сек):</label>
+                <input type="number" id="newDurationInput" value="16" step="0.1">
+            </div>
+            <button class="btn btn-full" onclick="extendComposition()">Изменить длительность</button>
+
+            <div class="input-group">
+                <label>Сдвиг слоёв (кадры):</label>
+                <input type="number" id="offsetInput" value="40">
+            </div>
+            <button class="btn btn-full" onclick="offsetSelectedLayers()">Сдвинуть слои</button>
+        </div>
+
+        <div class="section" id="presets">
+            <div class="section-title">Пресеты анимации</div>
+
+            <div class="animation-type">
+                <label>
+                    <input type="radio" name="animType" value="inout" checked>
+                    In/Out
+                </label>
+                <label>
+                    <input type="radio" name="animType" value="in">
+                    In
+                </label>
+                <label>
+                    <input type="radio" name="animType" value="out">
+                    Out
+                </label>
             </div>
 
-            <div class="section" id="composition">
-                <div class="section-title">Управление композицией</div>
-                <div class="controls">
-                    <button class="btn" onclick="deleteAllText()">Удалить текст</button>
-                    <button class="btn" onclick="changeCompSize()">1080x1080</button>
-                </div>
-                <div class="input-group">
-                    <label>Новая длительность (сек):</label>
-                    <input type="number" id="newDurationInput" value="16" step="0.1">
-                </div>
-                <button class="btn btn-full" onclick="extendComposition()">Изменить длительность</button>
-                
-                <div class="input-group">
-                    <label>Сдвиг слоёв (кадры):</label>
-                    <input type="number" id="offsetInput" value="40">
-                </div>
-                <button class="btn btn-full" onclick="offsetSelectedLayers()">Сдвинуть слои</button>
+            <div class="preset-list" id="presetList"></div>
+
+            <input type="text" id="presetNameInput" class="preset-name-input" placeholder="Имя пресета...">
+
+            <div class="preset-controls">
+                <button class="btn" onclick="savePreset()">Сохранить</button>
+                <button class="btn" onclick="applyPreset()">Применить</button>
             </div>
 
-            <div class="section" id="presets">
-                <div class="section-title">Пресеты анимации</div>
-                
-                <div class="animation-type">
-                    <label>
-                        <input type="radio" name="animType" value="inout" checked>
-                        In/Out
-                    </label>
-                    <label>
-                        <input type="radio" name="animType" value="in">
-                        In
-                    </label>
-                    <label>
-                        <input type="radio" name="animType" value="out">
-                        Out
-                    </label>
-                </div>
-                
-                <div class="preset-list" id="presetList"></div>
-                
-                <input type="text" id="presetNameInput" class="preset-name-input" placeholder="Имя пресета...">
-                
-                <div class="preset-controls">
-                    <button class="btn" onclick="savePreset()">Сохранить</button>
-                    <button class="btn" onclick="applyPreset()">Применить</button>
-                </div>
-                
-                <div class="input-group">
-                    <label>Применить к:</label>
-                    <select id="applyTarget" style="flex: 1; padding: 4px; background: #3a3a3a; border: 1px solid #555; color: #e0e0e0; font-size: 11px;">
-                        <option value="selected">Выделенным слоям</option>
-                        <option value="single">Одному слою</option>
-                    </select>
-                </div>
+            <div class="input-group">
+                <label>Применить к:</label>
+                <select id="applyTarget" style="flex: 1; padding: 4px; background: #3a3a3a; border: 1px solid #555; color: #e0e0e0; font-size: 11px;">
+                    <option value="selected">Выделенным слоям</option>
+                    <option value="single">Одному слою</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section" id="slogans">
+            <div class="section-title">Слоганы</div>
+
+            <div class="slogan-list" id="sloganList"></div>
+
+            <textarea id="sloganInput" class="slogan-input" placeholder="Введите слоган..."></textarea>
+
+            <div class="slogan-controls">
+                <button class="btn" onclick="addSlogan()">Добавить</button>
+                <button class="btn" onclick="addRandomSlogan()">Случайный</button>
+            </div>
+
+            <div class="input-group">
+                <label>Позиция текста:</label>
+                <select id="textPosition" style="flex: 1; padding: 4px; background: #3a3a3a; border: 1px solid #555; color: #e0e0e0; font-size: 11px;">
+                    <option value="center">По центру</option>
+                    <option value="bottom">Внизу</option>
+                    <option value="top">Вверху</option>
+                </select>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="js/CSInterface.js"></script>
-    <script>
-        let currentFolder = 'men';
-        let allFiles = { men: [], women: [] };
-        let filteredFiles = [];
-        let selectedFile = null;
-        let selectedPreset = null;
-        let presets = [];
+<script src="js/CSInterface.js"></script>
+<script src="js/slogans.js"></script>
+<script>
+    let currentFolder = 'men';
+    let allFiles = { men: [], women: [] };
+    let filteredFiles = [];
+    let selectedFile = null;
+    let selectedPreset = null;
+    let presets = [];
+    let slogans = [];
+    let selectedSlogan = null;
 
-        const folders = {
-            men: 'C:\\Users\\mrget\\Desktop\\scale men 1.5x',
-            women: 'C:\\Users\\mrget\\Desktop\\scale women 1.5x'
-        };
+    const folders = {
+        men: 'C:\\Users\\mrget\\Desktop\\scale men 1.5x',
+        women: 'C:\\Users\\mrget\\Desktop\\scale women 1.5x'
+    };
 
-        const presetFilePath = 'C:\\Users\\mrget\\Desktop\\vk_presets.json';
+    const presetFilePath = 'C:\\Users\\mrget\\Desktop\\vk_presets.json';
+    const sloganFilePath = 'C:\\Users\\mrget\\Desktop\\vk_slogans.json';
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadPresets();
-            refreshFiles();
-            setupEventListeners();
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPresets();
+        loadSlogans();
+        refreshFiles();
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                this.classList.add('active');
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+            });
         });
 
-        function setupEventListeners() {
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                    
-                    this.classList.add('active');
-                    const sectionId = this.getAttribute('data-section');
-                    document.getElementById(sectionId).classList.add('active');
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentFolder = this.getAttribute('data-folder');
+                filterFiles();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', filterFiles);
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('preset-item')) {
+                document.querySelectorAll('.preset-item').forEach(item => {
+                    item.style.background = '';
                 });
-            });
+                e.target.style.background = '#555';
+                selectedPreset = e.target.getAttribute('data-preset');
+            }
 
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFolder = this.getAttribute('data-folder');
-                    filterFiles();
+            if (e.target.classList.contains('slogan-item')) {
+                document.querySelectorAll('.slogan-item').forEach(item => {
+                    item.style.background = '';
                 });
-            });
-
-            document.getElementById('searchInput').addEventListener('input', filterFiles);
-
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('preset-item')) {
-                    document.querySelectorAll('.preset-item').forEach(item => {
-                        item.style.background = '';
-                    });
-                    e.target.style.background = '#555';
-                    selectedPreset = e.target.getAttribute('data-preset');
-                }
-            });
-        }
-
-        function refreshFiles() {
-            FileUtils.getFilesInFolder(folders.men, function(menFiles) {
-                allFiles.men = menFiles || [];
-                FileUtils.getFilesInFolder(folders.women, function(womenFiles) {
-                    allFiles.women = womenFiles || [];
-                    filterFiles();
-                });
-            });
-        }
-
-        function filterFiles() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const files = allFiles[currentFolder] || [];
-            
-            const fileNames = files.map(file => typeof file === 'object' ? file.name : file);
-            
-            filteredFiles = fileNames.filter(file => 
-                file.toLowerCase().includes(searchTerm)
-            );
-            
-            renderFileList();
-        }
-
-        function renderFileList() {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            
-            filteredFiles.forEach(file => {
-                const item = document.createElement('div');
-                item.className = 'file-item';
-                item.textContent = file;
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.file-item').forEach(i => i.style.background = '');
-                    this.style.background = '#555';
-                    selectedFile = file;
-                });
-                fileList.appendChild(item);
-            });
-        }
-
-        function addSelectedFile() {
-            if (!selectedFile) {
-                alert('Выберите файл для добавления');
-                return;
+                e.target.style.background = '#555';
+                selectedSlogan = e.target.getAttribute('data-slogan');
             }
-            
-            const duration = parseInt(document.getElementById('durationInput').value) || 40;
-            const filePath = folders[currentFolder] + '\\' + selectedFile;
-            
-            const script = `addFileToComposition("${filePath.replace(/\\/g, '\\\\')}", ${duration})`;
-            
-            window.csi.evalScript(script, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Файл добавлен:', result);
-                } else {
-                    alert('Ошибка: ' + result);
-                }
+        });
+    }
+
+    function refreshFiles() {
+        FileUtils.getFilesInFolder(folders.men, function(menFiles) {
+            allFiles.men = menFiles || [];
+            FileUtils.getFilesInFolder(folders.women, function(womenFiles) {
+                allFiles.women = womenFiles || [];
+                filterFiles();
             });
+        });
+    }
+
+    function filterFiles() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const files = allFiles[currentFolder] || [];
+
+        const fileNames = files.map(file => typeof file === 'object' ? file.name : file);
+
+        filteredFiles = fileNames.filter(file =>
+            file.toLowerCase().includes(searchTerm)
+        );
+
+        renderFileList();
+    }
+
+    function renderFileList() {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '';
+
+        filteredFiles.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.textContent = file;
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.file-item').forEach(i => i.style.background = '');
+                this.style.background = '#555';
+                selectedFile = file;
+            });
+            fileList.appendChild(item);
+        });
+    }
+
+    function addSelectedFile() {
+        if (!selectedFile) {
+            alert('Выберите файл для добавления');
+            return;
         }
 
-        function deleteAllText() {
-            window.csi.evalScript('deleteAllTextLayers()', function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Текст удалён:', result);
-                } else {
-                    alert('Ошибка: ' + result);
-                }
-            });
-        }
+        const duration = parseInt(document.getElementById('durationInput').value) || 40;
+        const filePath = folders[currentFolder] + '\\' + selectedFile;
 
-        function changeCompSize() {
-            window.csi.evalScript('changeCompToSquare()', function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Размер изменён:', result);
-                } else {
-                    alert('Ошибка: ' + result);
-                }
-            });
-        }
+        const script = `addFileToComposition("${filePath.replace(/\\/g, '\\\\')}", ${duration})`;
 
-        function extendComposition() {
-            const newDuration = parseFloat(document.getElementById('newDurationInput').value) || 16;
-            
-            window.csi.evalScript(`extendCompositionDuration(${newDuration})`, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Длительность изменена:', result);
-                } else {
-                    alert('Ошибка: ' + result);
-                }
-            });
-        }
-
-        function offsetSelectedLayers() {
-            const offset = parseInt(document.getElementById('offsetInput').value) || 40;
-            
-            window.csi.evalScript(`offsetSelectedLayers(${offset})`, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Слои сдвинуты:', result);
-                } else {
-                    alert('Ошибка: ' + result);
-                }
-            });
-        }
-
-        function savePreset() {
-            const presetName = document.getElementById('presetNameInput').value.trim();
-            if (!presetName) {
-                alert('Введите имя пресета');
-                return;
+        window.csi.evalScript(script, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Файл добавлен:', result);
+            } else {
+                alert('Ошибка: ' + result);
             }
-            
-            const animType = document.querySelector('input[name="animType"]:checked').value;
-            
-            window.csi.evalScript(`saveAnimationPreset("${animType}")`, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    const presetData = JSON.parse(result.substring(8));
-                    
-                    const preset = {
-                        name: presetName,
-                        type: animType,
-                        data: presetData,
-                        timestamp: Date.now()
-                    };
-                    
-                    presets.push(preset);
-                    savePresets();
-                    renderPresets();
-                    document.getElementById('presetNameInput').value = '';
-                    
-                    console.log('Пресет сохранён:', presetName);
-                } else {
-                    alert('Ошибка сохранения пресета: ' + result);
-                }
-            });
-        }
+        });
+    }
 
-        function applyPreset() {
-            if (!selectedPreset) {
-                alert('Выберите пресет для применения');
-                return;
+    function deleteAllText() {
+        window.csi.evalScript('deleteAllTextLayers()', function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Текст удалён:', result);
+            } else {
+                alert('Ошибка: ' + result);
             }
-            
-            const preset = presets.find(p => p.name === selectedPreset);
-            if (!preset) return;
-            
-            const applyTarget = document.getElementById('applyTarget').value;
-            const presetDataJson = JSON.stringify(preset.data).replace(/"/g, '\\"');
-            
-            window.csi.evalScript(`applyAnimationPreset("${presetDataJson}", "${preset.type}", "${applyTarget}")`, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    console.log('Пресет применён:', result);
-                } else {
-                    alert('Ошибка применения пресета: ' + result);
-                }
-            });
-        }
+        });
+    }
 
-        function deletePreset(presetName) {
-            presets = presets.filter(p => p.name !== presetName);
-            savePresets();
-            renderPresets();
-            if (selectedPreset === presetName) {
-                selectedPreset = null;
+    function changeCompSize() {
+        window.csi.evalScript('changeCompToSquare()', function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Размер изменён:', result);
+            } else {
+                alert('Ошибка: ' + result);
             }
-        }
+        });
+    }
 
-        function renamePreset(oldName) {
-            const newName = prompt('Новое имя пресета:', oldName);
-            if (newName && newName !== oldName) {
-                const preset = presets.find(p => p.name === oldName);
-                if (preset) {
-                    preset.name = newName;
-                    savePresets();
-                    renderPresets();
-                    if (selectedPreset === oldName) {
-                        selectedPreset = newName;
-                    }
-                }
+    function extendComposition() {
+        const newDuration = parseFloat(document.getElementById('newDurationInput').value) || 16;
+
+        window.csi.evalScript(`extendCompositionDuration(${newDuration})`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Длительность изменена:', result);
+            } else {
+                alert('Ошибка: ' + result);
             }
+        });
+    }
+
+    function offsetSelectedLayers() {
+        const offset = parseInt(document.getElementById('offsetInput').value) || 40;
+
+        window.csi.evalScript(`offsetSelectedLayers(${offset})`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Слои сдвинуты:', result);
+            } else {
+                alert('Ошибка: ' + result);
+            }
+        });
+    }
+
+    function savePreset() {
+        const presetName = document.getElementById('presetNameInput').value.trim();
+        if (!presetName) {
+            alert('Введите имя пресета');
+            return;
         }
 
-        function renderPresets() {
-            const presetList = document.getElementById('presetList');
-            presetList.innerHTML = '';
-            
-            const currentAnimType = document.querySelector('input[name="animType"]:checked').value;
-            const filteredPresets = presets.filter(p => p.type === currentAnimType);
-            
-            filteredPresets.forEach(preset => {
-                const item = document.createElement('div');
-                item.className = 'preset-item';
-                item.setAttribute('data-preset', preset.name);
-                
-                const name = document.createElement('span');
-                name.textContent = preset.name;
-                
-                const actions = document.createElement('div');
-                actions.className = 'preset-actions';
-                
-                const renameBtn = document.createElement('button');
-                renameBtn.className = 'preset-btn';
-                renameBtn.textContent = 'R';
-                renameBtn.title = 'Переименовать';
-                renameBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    renamePreset(preset.name);
+        const animType = document.querySelector('input[name="animType"]:checked').value;
+
+        window.csi.evalScript(`saveAnimationPreset("${animType}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                const presetData = JSON.parse(result.substring(8));
+
+                const preset = {
+                    name: presetName,
+                    type: animType,
+                    data: presetData,
+                    timestamp: Date.now()
                 };
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'preset-btn';
-                deleteBtn.textContent = 'X';
-                deleteBtn.title = 'Удалить';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    deletePreset(preset.name);
-                };
-                
-                actions.appendChild(renameBtn);
-                actions.appendChild(deleteBtn);
-                
-                item.appendChild(name);
-                item.appendChild(actions);
-                
-                presetList.appendChild(item);
-            });
+
+                presets.push(preset);
+                savePresets();
+                renderPresets();
+                document.getElementById('presetNameInput').value = '';
+
+                console.log('Пресет сохранён:', presetName);
+            } else {
+                alert('Ошибка сохранения пресета: ' + result);
+            }
+        });
+    }
+
+    function applyPreset() {
+        if (!selectedPreset) {
+            alert('Выберите пресет для применения');
+            return;
         }
 
-        function loadPresets() {
-            window.csi.evalScript(`loadPresetsFromFile("${presetFilePath.replace(/\\/g, '\\\\')}")`, function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    try {
-                        presets = JSON.parse(result.substring(8));
-                    } catch (e) {
-                        presets = [];
-                    }
-                } else {
+        const preset = presets.find(p => p.name === selectedPreset);
+        if (!preset) return;
+
+        const applyTarget = document.getElementById('applyTarget').value;
+        const presetDataJson = JSON.stringify(preset.data).replace(/"/g, '\\"');
+
+        window.csi.evalScript(`applyAnimationPreset("${presetDataJson}", "${preset.type}", "${applyTarget}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Пресет применён:', result);
+            } else {
+                alert('Ошибка применения пресета: ' + result);
+            }
+        });
+    }
+
+    function deletePreset(presetName) {
+        presets = presets.filter(p => p.name !== presetName);
+        savePresets();
+        renderPresets();
+        if (selectedPreset === presetName) {
+            selectedPreset = null;
+        }
+    }
+
+    function renamePreset(oldName) {
+        const newName = prompt('Новое имя пресета:', oldName);
+        if (newName && newName !== oldName) {
+            const preset = presets.find(p => p.name === oldName);
+            if (preset) {
+                preset.name = newName;
+                savePresets();
+                renderPresets();
+                if (selectedPreset === oldName) {
+                    selectedPreset = newName;
+                }
+            }
+        }
+    }
+
+    function renderPresets() {
+        const presetList = document.getElementById('presetList');
+        presetList.innerHTML = '';
+
+        const currentAnimType = document.querySelector('input[name="animType"]:checked').value;
+        const filteredPresets = presets.filter(p => p.type === currentAnimType);
+
+        filteredPresets.forEach(preset => {
+            const item = document.createElement('div');
+            item.className = 'preset-item';
+            item.setAttribute('data-preset', preset.name);
+
+            const name = document.createElement('span');
+            name.textContent = preset.name;
+
+            const actions = document.createElement('div');
+            actions.className = 'preset-actions';
+
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'preset-btn';
+            renameBtn.textContent = 'R';
+            renameBtn.title = 'Переименовать';
+            renameBtn.onclick = (e) => {
+                e.stopPropagation();
+                renamePreset(preset.name);
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'preset-btn';
+            deleteBtn.textContent = 'X';
+            deleteBtn.title = 'Удалить';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deletePreset(preset.name);
+            };
+
+            actions.appendChild(renameBtn);
+            actions.appendChild(deleteBtn);
+
+            item.appendChild(name);
+            item.appendChild(actions);
+
+            presetList.appendChild(item);
+        });
+    }
+
+    function loadPresets() {
+        window.csi.evalScript(`loadPresetsFromFile("${presetFilePath.replace(/\\/g, '\\\\')}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                try {
+                    presets = JSON.parse(result.substring(8));
+                } catch (e) {
                     presets = [];
                 }
-                renderPresets();
-            });
-        }
-
-        function savePresets() {
-            const presetsJson = JSON.stringify(presets).replace(/"/g, '\\"');
-            window.csi.evalScript(`savePresetsToFile("${presetFilePath.replace(/\\/g, '\\\\')}", "${presetsJson}")`, function(result) {
-                if (!result.startsWith('SUCCESS:')) {
-                    console.error('Ошибка сохранения пресетов:', result);
-                }
-            });
-        }
-
-        document.querySelectorAll('input[name="animType"]').forEach(radio => {
-            radio.addEventListener('change', renderPresets);
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof window.csi === 'undefined') {
-                console.error('CEP Interface не найден');
-                return;
+            } else {
+                presets = [];
             }
-            
-            loadPresets();
-            refreshFiles();
-            setupEventListeners();
-            
-            window.csi.evalScript('getProjectInfo()', function(result) {
-                if (result.startsWith('SUCCESS:')) {
-                    const projectInfo = JSON.parse(result.substring(8));
-                    console.log('Project Info:', projectInfo);
-                }
-            });
+            renderPresets();
         });
-    </script>
+    }
+
+    function savePresets() {
+        const presetsJson = JSON.stringify(presets).replace(/"/g, '\\"');
+        window.csi.evalScript(`savePresetsToFile("${presetFilePath.replace(/\\/g, '\\\\')}", "${presetsJson}")`, function(result) {
+            if (!result.startsWith('SUCCESS:')) {
+                console.error('Ошибка сохранения пресетов:', result);
+            }
+        });
+    }
+
+    function addSlogan() {
+        const sloganText = document.getElementById('sloganInput').value.trim();
+        if (!sloganText) {
+            alert('Введите текст слогана');
+            return;
+        }
+
+        const position = document.getElementById('textPosition').value;
+
+        window.csi.evalScript(`addTextToComposition("${sloganText.replace(/"/g, '\\"')}", "${position}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Слоган добавлен:', result);
+
+                const slogan = {
+                    text: sloganText,
+                    timestamp: Date.now()
+                };
+
+                slogans.push(slogan);
+                saveSlogans();
+                renderSlogans();
+                document.getElementById('sloganInput').value = '';
+            } else {
+                alert('Ошибка добавления слогана: ' + result);
+            }
+        });
+    }
+
+    function addRandomSlogan() {
+        if (typeof window.slogansData === 'undefined' || !window.slogansData.length) {
+            alert('Список слоганов не загружен');
+            return;
+        }
+
+        const randomSlogan = window.slogansData[Math.floor(Math.random() * window.slogansData.length)];
+        const position = document.getElementById('textPosition').value;
+
+        window.csi.evalScript(`addTextToComposition("${randomSlogan.replace(/"/g, '\\"')}", "${position}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                console.log('Случайный слоган добавлен:', result);
+
+                const slogan = {
+                    text: randomSlogan,
+                    timestamp: Date.now()
+                };
+
+                slogans.push(slogan);
+                saveSlogans();
+                renderSlogans();
+            } else {
+                alert('Ошибка добавления слогана: ' + result);
+            }
+        });
+    }
+
+    function deleteSlogan(sloganText) {
+        slogans = slogans.filter(s => s.text !== sloganText);
+        saveSlogans();
+        renderSlogans();
+        if (selectedSlogan === sloganText) {
+            selectedSlogan = null;
+        }
+    }
+
+    function renderSlogans() {
+        const sloganList = document.getElementById('sloganList');
+        sloganList.innerHTML = '';
+
+        slogans.forEach(slogan => {
+            const item = document.createElement('div');
+            item.className = 'slogan-item';
+            item.setAttribute('data-slogan', slogan.text);
+
+            const text = document.createElement('div');
+            text.className = 'slogan-text';
+            text.textContent = slogan.text;
+
+            const actions = document.createElement('div');
+            actions.className = 'slogan-actions';
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'slogan-btn';
+            addBtn.textContent = '+';
+            addBtn.title = 'Добавить в композицию';
+            addBtn.onclick = (e) => {
+                e.stopPropagation();
+                const position = document.getElementById('textPosition').value;
+                window.csi.evalScript(`addTextToComposition("${slogan.text.replace(/"/g, '\\"')}", "${position}")`, function(result) {
+                    if (result.startsWith('SUCCESS:')) {
+                        console.log('Слоган добавлен в композицию:', result);
+                    } else {
+                        alert('Ошибка добавления слогана: ' + result);
+                    }
+                });
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'slogan-btn';
+            deleteBtn.textContent = 'X';
+            deleteBtn.title = 'Удалить';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteSlogan(slogan.text);
+            };
+
+            actions.appendChild(addBtn);
+            actions.appendChild(deleteBtn);
+
+            item.appendChild(text);
+            item.appendChild(actions);
+
+            sloganList.appendChild(item);
+        });
+    }
+
+    function loadSlogans() {
+        window.csi.evalScript(`loadPresetsFromFile("${sloganFilePath.replace(/\\/g, '\\\\')}")`, function(result) {
+            if (result.startsWith('SUCCESS:')) {
+                try {
+                    slogans = JSON.parse(result.substring(8));
+                } catch (e) {
+                    slogans = [];
+                }
+            } else {
+                slogans = [];
+            }
+            renderSlogans();
+        });
+    }
+
+    function saveSlogans() {
+        const slogansJson = JSON.stringify(slogans).replace(/"/g, '\\"');
+        window.csi.evalScript(`savePresetsToFile("${sloganFilePath.replace(/\\/g, '\\\\')}", "${slogansJson}")`, function(result) {
+            if (!result.startsWith('SUCCESS:')) {
+                console.error('Ошибка сохранения слоганов:', result);
+            }
+        });
+    }
+</script>
 </body>
 </html>
